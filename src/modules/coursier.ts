@@ -79,10 +79,15 @@ export async function install(): Promise<void> {
 
     const scalafixBinaryPath = path.join(binary, 'scalafix')
 
-    await exec.exec('cs', ['bootstrap', '--main', 'scalafix.cli.Cli', scalafixDependency, '-o', scalafixBinaryPath], {
-      silent: true,
-      listeners: {stdline: core.debug, errline: core.debug},
-    })
+    // `cs bootstrap` refuses to overwrite its output, which breaks a second run of this action in the same job.
+    await exec.exec(
+      'cs',
+      ['bootstrap', '--main', 'scalafix.cli.Cli', scalafixDependency, '-o', scalafixBinaryPath, '--force'],
+      {
+        silent: true,
+        listeners: {stdline: core.debug, errline: core.debug},
+      },
+    )
 
     const scalafmtVersion = await execute('cs', 'launch', 'scalafmt', '--', '--version')
 
